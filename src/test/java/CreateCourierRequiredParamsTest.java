@@ -10,6 +10,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 @RunWith(Parameterized.class)
 public class CreateCourierRequiredParamsTest {
+    private static final String BASE_URI = "https://qa-scooter.praktikum-services.ru/";
+    private static final String POST_API_V1_COURIER = "/api/v1/courier";
     private final String courierLogin;
     private final String courierPassword;
     private final String courierFirstName;
@@ -29,7 +31,7 @@ public class CreateCourierRequiredParamsTest {
 
     @Before
     public void setUp(){
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru/";
+        RestAssured.baseURI = BASE_URI;
     }
     @Test
     public void createCourier(){
@@ -41,7 +43,7 @@ public class CreateCourierRequiredParamsTest {
                 .and()
                 .body(courier)
                 .when()
-                .post("/api/v1/courier")
+                .post(POST_API_V1_COURIER)
                 .then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
                 .and().statusCode(400);
 

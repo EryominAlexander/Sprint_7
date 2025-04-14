@@ -36,10 +36,12 @@ public class CreateCourierTest {
                 .then().assertThat().body("ok", equalTo(true))
                 .and().statusCode(201);
 
+        CourierAuth courierAuth = new CourierAuth(courier.getLogin(), courier.getPassword());
+
        courierId = given()
                 .header("Content-Type", "application/json")
                 .and()
-                .body(courier)
+                .body(courierAuth)
                 .when()
                 .post(POST_API_V1_LOGIN)
                .as(CourierId.class);
@@ -66,10 +68,12 @@ public class CreateCourierTest {
                 .and().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой."))
                 .and().statusCode(409);
 
+        CourierAuth courierAuth = new CourierAuth(courier.getLogin(), courier.getPassword());
+
         courierId = given()
                 .header("Content-Type", "application/json")
                 .and()
-                .body(courier)
+                .body(courierAuth)
                 .when()
                 .post(POST_API_V1_LOGIN)
                 .as(CourierId.class);
