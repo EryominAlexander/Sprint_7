@@ -1,4 +1,6 @@
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,15 +40,22 @@ public class CreateCourierRequiredParamsTest {
 
         CourierData courier = new CourierData(courierLogin, courierPassword, courierFirstName);
 
-        given()
+        Response negativeResponse = postCreateCourierWithRequiredParams(courier);
+        checkNegativeResponseCreateCourierWithOutRequiredParams(negativeResponse);
+
+    }
+    @Step("Создание курьера POST /api/v1/courier")
+    public Response postCreateCourierWithRequiredParams(CourierData courier){
+        return given()
                 .header("Content-Type", "application/json")
                 .and()
                 .body(courier)
                 .when()
-                .post(POST_API_V1_COURIER)
-                .then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
+                .post(POST_API_V1_COURIER);
+    }
+    @Step("Проверка ошибки с кодом 400 POST /api/v1/courier")
+    public void checkNegativeResponseCreateCourierWithOutRequiredParams(Response response){
+        response.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
                 .and().statusCode(400);
-
-
     }
 }

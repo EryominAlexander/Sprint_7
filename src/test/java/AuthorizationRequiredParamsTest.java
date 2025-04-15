@@ -1,4 +1,6 @@
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,13 +37,21 @@ public class AuthorizationRequiredParamsTest {
     public void authorizationRequiredParamsTest(){
         CourierAuth courierAuth = new CourierAuth(login, password);
 
-        given()
+        Response response = postCourierAuthorization(courierAuth);
+        negativeCheckResponsePostCourierAuthorizationWithOutRequiredParams(response);
+    }
+    @Step("Авторизация курьера без обязатальных параметров POST /api/v1/courier/login")
+    public Response postCourierAuthorization(CourierAuth courierAuth){
+        return given()
                 .header("Content-Type", "application/json")
                 .and()
                 .body(courierAuth)
                 .when()
-                .post(POST_API_V1_LOGIN)
-                .then().assertThat().body("message", equalTo("Недостаточно данных для входа"))
+                .post(POST_API_V1_LOGIN);
+    }
+    @Step("Проверка ответа при авторизации без обязательных параметров POST /api/v1/courier/login")
+    public void negativeCheckResponsePostCourierAuthorizationWithOutRequiredParams(Response response){
+        response.then().assertThat().body("message", equalTo("Недостаточно данных для входа"))
                 .and().statusCode(400);
     }
 }

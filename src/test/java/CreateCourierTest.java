@@ -1,4 +1,6 @@
+import io.qameta.allure.Step;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,18 +29,11 @@ public class CreateCourierTest {
 
         CourierData courier = new CourierData(courierLogin, courierPassword, courierFirstName);
 
-        given()
-                .header("Content-Type", "application/json")
-                .and()
-                .body(courier)
-                .when()
-                .post(POST_API_V1_COURIER)
-                .then().assertThat().body("ok", equalTo(true))
-                .and().statusCode(201);
+        Response response = postCreateCourier(courier);
+        checkResponseCreateCourier(response);
 
         CourierAuth courierAuth = new CourierAuth(courier.getLogin(), courier.getPassword());
-
-       courierId = given()
+        courierId = given()
                 .header("Content-Type", "application/json")
                 .and()
                 .body(courierAuth)
@@ -51,25 +46,12 @@ public class CreateCourierTest {
     public void negativeCreateTwoCouriers(){
 
         CourierData courier = new CourierData(courierLogin, courierPassword, courierFirstName);
-        given()
-                .header("Content-Type", "application/json")
-                .and()
-                .body(courier)
-                .when()
-                .post(POST_API_V1_COURIER);
-
-        given()
-                .header("Content-Type", "application/json")
-                .and()
-                .body(courier)
-                .when()
-                .post(POST_API_V1_COURIER)
-                .then().assertThat().body("code",equalTo(409))
-                .and().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой."))
-                .and().statusCode(409);
+        Response response = postCreateCourier(courier);
+        checkResponseCreateCourier(response);
+        Response negativeResponse = postCreateCourier(courier);
+        checkNegativeResponseCreateCourier(negativeResponse);
 
         CourierAuth courierAuth = new CourierAuth(courier.getLogin(), courier.getPassword());
-
         courierId = given()
                 .header("Content-Type", "application/json")
                 .and()
@@ -82,5 +64,26 @@ public class CreateCourierTest {
     @After
     public void clearing(){
         given().delete(DELETE_API_V1_COURIER + courierId.getId());
+    }
+
+    @Step("Создание курьера POST /api/v1/courier")
+    public Response postCreateCourier(CourierData courier){
+        return given()
+                .header("Content-Type", "application/json")
+                .and()
+                .body(courier)
+                .when()
+                .post(POST_API_V1_COURIER);
+    }
+    @Step("Проверка ответа POST /api/v1/courier")
+    public void checkResponseCreateCourier(Response response){
+        response.then().assertThat().body("ok", equalTo(true))
+                .and().statusCode(201);
+    }
+    @Step("Проверка негативного ответа POST /api/v1/courier")
+    public void checkNegativeResponseCreateCourier(Response response){
+        response.then().assertThat().body("code",equalTo(409))
+                .and().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой."))
+                .and().statusCode(409);
     }
 }
